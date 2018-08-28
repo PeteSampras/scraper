@@ -80,7 +80,7 @@ def clean_name(my_file):
 
 # create a class for our shows
 class Show:
-    def __init__(self,show_name,show_id,last_season,last_episode,min_res,max_res,entry):
+    def __init__(self,show_name,show_id,last_season,last_episode,min_res,max_res,entry,comment,time):
         self.name = show_name
         self.id = show_id
         self.season = last_season
@@ -88,7 +88,8 @@ class Show:
         self.min_resolution = min_res
         self.max_resolution = max_res
         self.xls_entry = entry
-
+        self.comments=comment
+        self.timestamp=time
 
 # check xls to see what shows to search for and build them into class Show
 # open the excel file, find my worksheet, and find the last used row in the sheet
@@ -106,7 +107,9 @@ for i in range(2,last_row): #read the file and pull each column value to populat
     episode = sheet.cell(row=i,column=4).value
     minres = sheet.cell(row=i,column=5).value
     maxres = sheet.cell(row=i,column=6).value
-    shows.append(Show(name,id,season,episode,minres,maxres,i))
+    comments = sheet.cell(row=i,column=7).value
+    timestamp = sheet.cell(row=i,column=8).value
+    shows.append(Show(name,id,season,episode,minres,maxres,i,comments,timestamp))
 
 # once we have all shows built, scan to see what is currently in show show_directory to see if anything is newer
 # scan directory to see what we have
@@ -159,6 +162,7 @@ for each in shows:
 
 reserved=[] # need to keep a reserve list of files we are currently trying to download to make sure we dont delete them until script is ran again
 for show in shows:
+    episode_count=0
     if show.id!=None:
         link_name = show.name.replace(" ",".").title()
         page_name=  show.name.replace(" ","-").lower()
@@ -185,12 +189,16 @@ for show in shows:
                     download=link.get('href')
                     new_show = get_ep_info(str(download).split("torrent/",1)[1])
                     epi=str(new_show.season)+str(new_show.episode)
-                    if new_show.season>show.season or (new_show.season==show.season and new_show.episode>show.episode) and new_show.resolution>=show.resolution and epi not in episodes:
+                    if new_show.season>show.season or (new_show.season==show.season and \
+                       new_show.episode>show.episode) and new_show.resolution>=show.min_resolution and \
+                       new_show.resolution<=show.max_resolution and epi not in episodes and episode_count==0:
                         episodes.append(epi)
                         print(f'Downloading and updating info for {show.name} - Season: {new_show.season} Episode: {new_show.episode}')
                         sheet.cell(row=show.xls_entry,column=3).value=new_show.season
                         sheet.cell(row=show.xls_entry,column=4).value=new_show.episode
                         wb.save(show_xls)
+                        if 'last' in show.comments:
+                            episode_count=1
                         # then download the .torrent
                         urlopen = urllib.request.URLopener()
                         urlopen.addheaders=[('User-Agent' , 'Mozilla/5.0')]
