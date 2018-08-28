@@ -140,6 +140,7 @@ for each in shows:
                 if each.resolution==None:
                     print(f'Updating {name} to {info.resolution}P resolution')
                     sheet.cell(row=each.xls_entry,column=5).value=info.resolution
+                    sheet.cell(row=each.xls_entry,column=6).value=info.resolution
             except ValueError:
                 continue
 #save the workbook
