@@ -16,6 +16,7 @@ web_page= 'https://eztv.ag/shows/'
 show_directory="f:/misc/"
 wkbook_name = "Shows.xlsx" # columns: Name|EZTV ID|Season|Episode|Min Resolution|Max Resolution|Comments|Timestamp
 wksheet_name = 'Shows'
+only_get_last = 'last'
 show_xls = show_directory+wkbook_name
 
 
@@ -198,7 +199,7 @@ for show in shows:
                         sheet.cell(row=show.xls_entry,column=3).value=new_show.season
                         sheet.cell(row=show.xls_entry,column=4).value=new_show.episode
                         wb.save(show_xls)
-                        if 'last' in show.comments:
+                        if only_get_last is not None and only_get_last in show.comments:
                             episode_count=1
                         # then download the .torrent
                         urlopen = urllib.request.URLopener()
