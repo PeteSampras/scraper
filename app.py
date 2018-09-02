@@ -101,7 +101,6 @@ def get_ep_info(my_file): # this parse is needed to get season, episode, and res
     temp.resolition=480
     return temp
 
-
 # clean up function
 def clean_name(my_file):
     new_name=""
@@ -118,7 +117,6 @@ def clean_name(my_file):
         new_name=new_name+word+'.'
         if "720" in word or "1080" in word or "480" in word:
             return new_name.title()
-
 
 # create a class for our shows
 class Show:
@@ -164,7 +162,6 @@ with os.scandir(show_directory) as it:
             file_names.append(each.name)
 os.scandir(show_directory).close()
 
-
 # compare what is in directory and update the xls if anything newer is found
 for each in shows:
     name=each.name.replace(' ','.')
@@ -195,12 +192,8 @@ for each in shows:
     else:
         each.update=False
 
-
-
 # once we check directory, check website for newer and compare to desired video resolution
-
 # once all checks out, download and open torrent.
-
 # once download starts, update csv
 
 reserved=[] # need to keep a reserve list of files we are currently trying to download to make sure we dont delete them until script is ran again
@@ -250,6 +243,10 @@ for show in shows:
                         # run the .torrent
                         reserved.append(download_name) # reserve the file so we dont delete it in the clean up
                         os.startfile(download_name)
+                        #email the episode info
+                        subj = f'{show.name} Season: {new_show.season} Episode: {new_show.episode} now available'
+                        mess = f'{show.name} Season: {new_show.season} Episode: {new_show.episode} now available'
+                        email_this(subj,mess)
 
 # clean up
 with os.scandir(show_directory) as it:
@@ -263,11 +260,7 @@ with os.scandir(show_directory) as it:
             new = new + "mp4"
             os.rename(show_directory+each.name,show_directory+new)
         elif each.name.endswith(".torrent") and each.is_file()==True:
-            found = False
-            for show in reserved: # TODO: I think this can just be changed to 'if each.name in reserved:'
-                if each.name in show:
-                    found = True
-            if found == False:
+            if each.name not in reserved:
                 print(f'Cleaning up, removing: {each.name}')
                 os.remove(show_directory+ each.name)
 os.scandir(show_directory).close()
