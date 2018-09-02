@@ -8,6 +8,8 @@ import urllib.request
 import os
 from bs4 import BeautifulSoup
 import openpyxl
+import smtplib
+import configparser
 #from datetime import datetime
 
 # pragma region globals
@@ -19,6 +21,44 @@ wksheet_name = 'Shows'
 only_get_last = 'last'
 show_xls = show_directory+wkbook_name
 
+# config file settings
+config_file="F:/misc/config.ini"
+config_header="EMAIL"                           # config file email section [header]. [EMAIL]
+config_sender_email='sender_address'            # sender email address key
+config_sender_password='sender_password'        # sender email password key
+config_to_email='to_address'                    # recipient email address key
+
+# email info
+smtp_server='smtp.gmail.com'                    # smtp server
+smtp_port=587                                   # smtp port
+
+# config parse
+config = configparser.ConfigParser()            # setup
+config.read(config_file)                        # read file
+if config_header in config:                     # check for all those settings
+    if config_sender_email in config[config_header]:
+        sender_email_address=config[config_header][config_sender_email]
+        print(sender_email_address)
+    if config_sender_password in config[config_header]:
+        sender_email_password=config[config_header][config_sender_password]
+    if config_to_email in config[config_header]:
+        to_email_address=config[config_header][config_to_email]
+        print(to_email_address)
+
+# email function
+def email_this(subject,msg):
+    s = smtplib.SMTP(smtp_server, smtp_port)                    # check server
+    s.ehlo()                                                    # handshake server
+    s.starttls()                                                # turn on TLS
+    s.login(sender_email_address, sender_email_password)        # log in
+    message = "\r\n".join([                                     # create email
+            "From: " + sender_email_address,
+            "To: " + to_email_address,
+            "Subject: " + subject,
+            msg
+            ])
+    s.sendmail(sender_email_address, to_email_address, message) #send email
+    s.quit()                                                    # quit
 
 # helper function to see if a number is an integer to check season data
 def is_valid_int(s):
@@ -34,6 +74,7 @@ class parse_episode:
     def __init__(self,season,episode):
         self.season=season
         self.episode=episode
+        self.resolution=480
 
 def get_ep_info(my_file): # this parse is needed to get season, episode, and resolution info from the name of the file
     temp = parse_episode(0,0)
@@ -138,7 +179,7 @@ for each in shows:
                 elif info.episode>each.episode and info.season==each.season:
                     print(f'Updating {name} to Episode {info.episode}')
                     sheet.cell(row=each.xls_entry,column=4).value=info.episode
-                if each.resolution==None:
+                if each.min_resolution==None:
                     print(f'Updating {name} to {info.resolution}P resolution')
                     sheet.cell(row=each.xls_entry,column=5).value=info.resolution
                     sheet.cell(row=each.xls_entry,column=6).value=info.resolution
@@ -230,6 +271,8 @@ with os.scandir(show_directory) as it:
                 print(f'Cleaning up, removing: {each.name}')
                 os.remove(show_directory+ each.name)
 os.scandir(show_directory).close()
+
+
 
     ## get magnet (could be useful later)
     ##link = soup.find('magnet')
