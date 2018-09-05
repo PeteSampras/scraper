@@ -38,12 +38,10 @@ config.read(config_file)                        # read file
 if config_header in config:                     # check for all those settings
     if config_sender_email in config[config_header]:
         sender_email_address=config[config_header][config_sender_email]
-        print(sender_email_address)
     if config_sender_password in config[config_header]:
         sender_email_password=config[config_header][config_sender_password]
     if config_to_email in config[config_header]:
         to_email_address=config[config_header][config_to_email]
-        print(to_email_address)
 
 # email function
 def email_this(subject,msg):
