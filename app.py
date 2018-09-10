@@ -231,8 +231,9 @@ for show in shows:
                         sheet.cell(row=show.xls_entry,column=3).value=new_show.season
                         sheet.cell(row=show.xls_entry,column=4).value=new_show.episode
                         wb.save(show_xls)
-                        if only_get_last is not None and only_get_last in show.comments:
-                            episode_count=1
+                        if show.comments is not None:
+                            if only_get_last in show.comments:
+                                episode_count=1
                         # then download the .torrent
                         urlopen = urllib.request.URLopener()
                         urlopen.addheaders=[('User-Agent' , 'Mozilla/5.0')]
@@ -240,7 +241,7 @@ for show in shows:
                         urlopen.retrieve(download , download_name)
                         # run the .torrent
                         reserved.append(download_name) # reserve the file so we dont delete it in the clean up
-                        os.startfile(download_name)
+                        # os.startfile(download_name) # this needs to be enabled to open file if you dont have that option turned on within BitTorrent client.
                         #email the episode info
                         subj = f'{show.name} Season: {new_show.season} Episode: {new_show.episode} now available'
                         mess = f'{show.name} Season: {new_show.season} Episode: {new_show.episode} now available'
