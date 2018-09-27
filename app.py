@@ -3,6 +3,7 @@
 # pip install openpyxl
 # pip install requests
 # pip install urllib
+# pip install psutil
 import requests as req
 import urllib.request
 import os
@@ -10,6 +11,8 @@ from bs4 import BeautifulSoup
 import openpyxl
 import smtplib
 import configparser
+import psutil
+
 #from datetime import datetime
 
 # pragma region globals
@@ -109,7 +112,7 @@ def clean_name(my_file):
     for word in split:
         if "[" in word.lower() or "]" in word.lower() or "proper" in word.lower():
             continue
-        if "hdtv" in word.lower() or "web" in word.lower():
+        if "hdtv" in word.lower() or "web" in word.lower() or "webrip" in word.lower():
             new_name=new_name+'480P.'
             return new_name.title()
         new_name=new_name+word+'.'
@@ -241,11 +244,20 @@ for show in shows:
                         urlopen.retrieve(download , download_name)
                         # run the .torrent
                         reserved.append(download_name) # reserve the file so we dont delete it in the clean up
-                        # os.startfile(download_name) # this needs to be enabled to open file if you dont have that option turned on within BitTorrent client.
+                        process = psutil.pids()
+                        found=False
+                        for id in process:
+                            proc = psutil.Process(id)
+                            if proc.name() == "BitTorrent.exe": # add here your process name
+                                found=True
+                        if found==False:
+                            os.startfile(download_name) # this needs to be enabled to open file if you dont have that option turned on within BitTorrent client.
                         #email the episode info
                         subj = f'{show.name} Season: {new_show.season} Episode: {new_show.episode} now available'
                         mess = f'{show.name} Season: {new_show.season} Episode: {new_show.episode} now available'
                         email_this(subj,mess)
+                        show.season=new_show.season
+                        show.episode=new_show.episode
 
 # clean up
 with os.scandir(show_directory) as it:
