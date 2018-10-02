@@ -198,6 +198,7 @@ for each in shows:
 # once download starts, update csv
 
 reserved=[] # need to keep a reserve list of files we are currently trying to download to make sure we dont delete them until script is ran again
+updates=False
 for show in shows:
     episode_count=0
     if show.id!=None:
@@ -224,7 +225,10 @@ for show in shows:
                 episodes=[]
                 for link in downloads:
                     download=link.get('href')
-                    new_show = get_ep_info(str(download).split("torrent/",1)[1])
+                    if "torrents" in str(download).lower():
+                        new_show = get_ep_info(str(download).split("torrents/",1)[1])
+                    else:
+                        new_show = get_ep_info(str(download).split("torrent/",1)[1]) 
                     epi=str(new_show.season)+str(new_show.episode)
                     if new_show.season>show.season or (new_show.season==show.season and \
                        new_show.episode>show.episode) and new_show.resolution>=show.min_resolution and \
@@ -258,7 +262,9 @@ for show in shows:
                         email_this(subj,mess)
                         show.season=new_show.season
                         show.episode=new_show.episode
-
+                        updates=True
+if updates==False:
+    print("No new episodes found at this time.")
 # clean up
 with os.scandir(show_directory) as it:
     for each in it:
