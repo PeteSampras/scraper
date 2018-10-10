@@ -174,13 +174,18 @@ for each in shows:
                     print(f'Updating {name} to Season: {info.season} Episode: {info.episode}')
                     sheet.cell(row=each.xls_entry,column=3).value=info.season
                     sheet.cell(row=each.xls_entry,column=4).value=info.episode
+                    each.season=info.season
+                    each.episode=info.episode
                 elif info.episode>each.episode and info.season==each.season:
                     print(f'Updating {name} to Episode {info.episode}')
                     sheet.cell(row=each.xls_entry,column=4).value=info.episode
+                    each.episode=info.episode
                 if each.min_resolution==None:
                     print(f'Updating {name} to {info.resolution}P resolution')
                     sheet.cell(row=each.xls_entry,column=5).value=info.resolution
                     sheet.cell(row=each.xls_entry,column=6).value=info.resolution
+                    each.min_resolution=info.resolution
+                    each.max_resolution=info.resolution
             except ValueError:
                 continue
 #save the workbook
