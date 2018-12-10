@@ -12,14 +12,12 @@ import openpyxl
 import smtplib
 import configparser
 import psutil
-import multiprocessing
-from multiprocessing import Process, Queue, current_process, freeze_support
 
 #from datetime import datetime
 
 # pragma region globals
 # set global variables for show_directory and excel file name
-web_page= 'https://eztv.io/shows/'
+web_page= 'https://eztv.ag/shows/'
 show_directory="f:/misc/"
 wkbook_name = "Shows.xlsx" # columns: Name|EZTV ID|Season|Episode|Min Resolution|Max Resolution|Comments|Timestamp
 wksheet_name = 'Shows'
@@ -112,7 +110,7 @@ def clean_name(my_file):
     else:
         split=my_file.split('.')
     for word in split:
-        if "[" in word.lower() or "]" in word.lower() or "proper" in word.lower() or "internal" in word.lower():
+        if "[" in word.lower() or "]" in word.lower() or "proper" in word.lower():
             continue
         if "hdtv" in word.lower() or "web" in word.lower() or "webrip" in word.lower():
             new_name=new_name+'480P.'
@@ -204,17 +202,6 @@ for each in shows:
 # once all checks out, download and open torrent.
 # once download starts, update csv
 
-# multi proc function
-def multProc(targetin, scanip, port):
-    jobs = []
-    p = multiprocessing.Process(target=targetin, args=(scanip,port))
-    jobs.append(p)
-    p.start()
-    return
-
-# build queue
-q = Queue()
-
 reserved=[] # need to keep a reserve list of files we are currently trying to download to make sure we dont delete them until script is ran again
 updates=False
 for show in shows:
@@ -283,8 +270,6 @@ for show in shows:
                         updates=True
 if updates==False:
     print("No new episodes found at this time.")
-
-    
 # clean up
 with os.scandir(show_directory) as it:
     for each in it:
